@@ -12,21 +12,23 @@ library(tidyverse)
 ```{r,echo=FALSE}
 rm(list=ls())
 reported <- c("2020-03-27")
-world_cases <- c(566269)
-world_deaths <- c(25423)
-world_recovered <- c(127768)
-#
+USA = c("USA")
 us_cases <- c(92929)
 us_deaths <- c(1380)
 us_recovered <- c(812)
+#
+World = "World"
+world_cases <- c(566269)
+world_deaths <- c(25423)
+world_recovered <- c(127768)
 #
 world_less_cases <- world_cases -us_cases
 world_less_deaths <- world_deaths -us_deaths
 world_less_recovered <- world_recovered -us_recovered
 ```
 ```{r}
-df <- data.frame("Reported"  = "2020-03-27", 
-                 "us_cases" =us_cases,
+df <- data.frame("Reported"  = reported, 
+                  "us_cases" =us_cases,
                   "us_deaths" = us_deaths,
                  "us_recovered" = us_recovered,
                   "world_cases" = world_cases ,
@@ -37,6 +39,26 @@ df <- data.frame("Reported"  = "2020-03-27",
                  "world_less_recovered" = world_less_recovered
                     )
 
+df.source <- data.frame("Reported"  = reported, 
+                  "Source" = USA,
+                  "Reported"  = reported,
+                  "Cases" =us_cases,
+                  "Deaths" = us_deaths,
+                 "Recovered" = us_recovered)
+df.source <- data.frame(
+                  "Source" = World,
+                  "Reported"  = reported,
+                  "Cases" = world_cases ,
+                 "Deaths" =  world_deaths,
+                  "Recovered" = world_recovered
+                                     )
+
+
+
+
+
+
+df$Reported <- as.Date(df$Reported)
 ```
 
 ## nCOVID-2019 Summary Report for Mar. 27,2020
