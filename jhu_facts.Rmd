@@ -1,0 +1,74 @@
+---
+title: "John Hopkins COVID-2019"
+author: "David J Jackson"
+date: "3/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+```{r,echo=FALSE}
+rm(list=ls())
+reported <- c("2020-03-27")
+world_cases <- c(566269)
+world_deaths <- c(25423)
+world_recovered <- c(127768)
+#
+us_cases <- c(92929)
+us_deaths <- c(1380)
+us_recovered <- c(812)
+#
+world_less_cases <- world_cases -us_cases
+world_less_deaths <- world_deaths -us_deaths
+world_less_recovered <- world_recovered -us_recovered
+```
+```{r}
+df <- data.frame("Reported"  = "2020-03-27", 
+                 "us_cases" =us_cases,
+                  "us_deaths" = us_deaths,
+                 "us_recovered" = us_recovered,
+                  "world_cases" = world_cases ,
+                 "world_deaths" =  world_deaths,
+                  "world_recovered" = world_recovered,
+                 "world_less_cases" = world_less_cases,
+                 "world_less_deaths" = world_less_deaths,
+                 "world_less_recovered" = world_less_recovered
+                    )
+
+```
+
+## nCOVID-2019 Summary Report for Mar. 27,2020
+* Data Source: John Hopkins Coronavirus Resource Center
+* URl: https://coronavirus.jhu.edu/map.html
+
+#### Data.table;
+```{r}
+df %>% DT::datatable()
+```
+
+#### US Death Rate: 
+```{r}
+df$us_deaths/df$us_cases *100
+```
+#### US Recovery Rate:
+```{r}
+df$us_recovered/df$us_cases * 100
+```
+#### World Death Rate(including USA)
+```{r}
+df$world_deaths/df$world_cases * 100
+```
+#### World Recovery Rate (including USA)
+```{r}
+df$world_recovered/df$world_cases * 100
+```
+#### The world (less USA) Death Rate
+```{r}
+df$world_less_deaths/df$world_less_cases *100
+```
+#### The World (less USA) Rate of Recovery
+```{r}
+df$world_less_recovered/df$world_less_cases *100
+```
