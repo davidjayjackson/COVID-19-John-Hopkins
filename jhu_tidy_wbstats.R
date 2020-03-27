@@ -1,6 +1,7 @@
 ## Author:  An Accounting and Data Science Nerd's Corner
 ## Source: https://www.r-bloggers.com/tidying-the-john-hopkins-covid-19-data/
 ##
+rm(list=ls())
 library(tidyverse)
 library(wbstats)
 
@@ -58,3 +59,9 @@ wb_data %>%
   ) %>% left_join(wb_data %>% select(iso3c, region, income) %>% distinct()) -> wb_cs
 
 write_csv(wb_cs, "jh_add_wbank_data.csv")
+##
+## create COVID-2019 JHWBand
+##
+library(RSQLite)
+db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
+dbWriteTable(db, "WBSTATS", wb_cs,overwrite=TRUE)
