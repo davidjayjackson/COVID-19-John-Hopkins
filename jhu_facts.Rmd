@@ -43,10 +43,6 @@ df <- data.frame("Reported"  = "2020-03-27",
 * Data Source: John Hopkins Coronavirus Resource Center
 * URl: https://coronavirus.jhu.edu/map.html
 
-#### Data.table;
-```{r}
-df %>% DT::datatable()
-```
 
 #### US Death Rate: 
 ```{r}
