@@ -118,4 +118,5 @@ write_csv(jh_covid19_data, sprintf("jh_covid19_data_%s.csv", Sys.Date()))
 # The code essentially follows the following steps
 library(RSQLite)
 db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
+jh_covid19_data$date <- as.character(jh_covid19_data$date)
 dbWriteTable(db, "JHUDATA",jh_covid19_data ,overwrite=TRUE)
