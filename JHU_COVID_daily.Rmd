@@ -53,59 +53,54 @@ ECDC_Countries <- ECDC %>% group_by(Countries) %>%                              
                                      
 ```
 
-
-
-
-
-
-
 ```{r,echo=FALSE}   
-ECDC_Countries_LT50 <- ECDC_Countries %>% filter(TotalCases <= 49)
-ECDC_Countries_50 <- ECDC_Countries %>% filter(TotalCases >=50)
-ECDC_Countries_500 <- ECDC_Countries %>% filter(TotalCases >=500)
-ECDC_Countries_1000 <- ECDC_Countries %>% filter(TotalCases >=1000)
-ECDC_Countries_5000 <- ECDC_Countries %>% filter(TotalCases >=5000)
-ECDC_Countries_10000 <- ECDC_Countries %>% filter(TotalCases >=10000)
+# ECDC_Countries_LT50 <- ECDC_Countries %>% filter(TotalCases <= 49)
+# ECDC_Countries_50 <- ECDC_Countries %>% filter(TotalCases >=1000)
+# ECDC_Countries_500 <- ECDC_Countries %>% filter(TotalCases >=2000)
+# ECDC_Countries_1000 <- ECDC_Countries %>% filter(TotalCases >=4000)
+# ECDC_Countries_5000 <- ECDC_Countries %>% filter(TotalCases >=8000)
+# ECDC_Countries_10000 <- ECDC_Countries %>% filter(TotalCases >=16000)
 ```
 #### Total Confimed  Cases by Countries
 
 ```{r,echo=FALSE}
-
- ECDC_Countries_LT50  %>%
-  ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+ECDC_Countries %>% filter(TotalCases <= 49) %>%
+   ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
         labs(title ="Countries with Confirmed Cases <= 50") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
 ```
 ```{r,echo=FALSE}
- ECDC_Countries_50  %>%
+ECDC_Countries_50 <- ECDC_Countries %>% filter(TotalCases >=1000) %>%
   ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
-        labs(title ="Countries with Confirmed Cases >= 50") +
+        labs(title ="Countries with Confirmed Cases >= 1000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
 ```
 
 ```{r,echo=FALSE}
+ECDC_Countries_500 <- ECDC_Countries %>% filter(TotalCases >=2000)
+
  ECDC_Countries_500  %>%
   ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
-        labs(title ="Countries with Confirmed Cases >= 500") +
+        labs(title ="Countries with Confirmed Cases >= 2000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
 ```
 ```{r, echo=FALSE}
-# 
+ECDC_Countries_1000 <- ECDC_Countries %>% filter(TotalCases >=4000)
 ECDC_Countries_1000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
-        labs(title ="Countries with Confirmed Cases >=1000") +
+        labs(title ="Countries with Confirmed Cases >=4000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
 ```
 ```{r,echo=FALSE}
-#
+ECDC_Countries_5000 <- ECDC_Countries %>% filter(TotalCases >=8000)
 ECDC_Countries_5000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
-        labs(title ="Countries with Confirmed Cases >= 5000") +
+        labs(title ="Countries with Confirmed Cases >= 8000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
   
 ```
 ```{r,echo=FALSE}
-#
+ECDC_Countries_10000 <- ECDC_Countries %>% filter(TotalCases >=16000)
 ECDC_Countries_10000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
-        labs(title ="Countries with Confirmed Cases >= 10000") +
+        labs(title ="Countries with Confirmed Cases >= 16000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
   
 ```
@@ -133,8 +128,8 @@ ECDC_Countries_5000 %>% ggplot() +geom_col(aes(x=reorder(Countries,PercentDeaths
 #### US Vs World: Total Cases,Total Deaths, Death Rate
 
 ```{r}
-ECDC_us <- ECDC %>% filter(Countries=="USA")
-ECDC_world <- ECDC %>% filter(Countries !="USA")
+ECDC_us <- ECDC %>% filter(Countries=="US")
+ECDC_world <- ECDC %>% filter(Countries !="US")
 #
 world_total_daily <- ECDC_world %>% group_by(Reported) %>% summarise(
                                       TotalCases = sum(Cases),
@@ -181,15 +176,15 @@ world_total_daily %>% ggplot() +geom_line(aes(x=Reported,y=TotalDeaths,col="Tota
   geom_line(aes(x=Reported,y=E1,col="Exponential")) + labs(title="Total Deaths vs Moving Average",subtitle ="( 20 Day Exponential Moving Average)" )
 ```
 
-### European CDC: Just the Facts
+###  Just the Facts
 
 ```{r}
-world_less_us <- ECDC%>% filter(Countries !="USA")
+world_less_us <- ECDC%>% filter(Countries !="US")
 sum(na.omit(world_less_us$Deaths))/sum(na.omit(world_less_us$Cases)) *100
 
 sum(na.omit(ECDC$Deaths))/sum(na.omit(ECDC$Cases)) *100
 
-US <-ECDC %>% filter(Countries=="USA")
+US <-ECDC %>% filter(Countries=="US")
 sum(na.omit(US$Deaths))/sum(na.omit(US$Cases)) * 100
 
 
