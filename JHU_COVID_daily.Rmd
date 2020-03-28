@@ -1,0 +1,201 @@
+---
+title: 'John Hopkins : China (novel-COVID-19) Flu'
+author: "David J Jackson"
+date: "2020-03-25 22:15 EST/EDT"
+output: html_document
+---
+
+```{r setup, include=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(data.table)
+library(lubridate)
+library(plotly)
+library(RSQLite)
+library(pracma)
+library(forcats)
+```
+```{r}
+# rm(list=ls())
+```
+```{r,echo=FALSE}
+db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
+# ECDC_dat <- dbGetQuery(db, "SELECT # # Countries,CountryCode,Reported,Cases,Deaths,Population FROM ECDC;")
+#
+ECDC_dat <- dbGetQuery(db, "SELECT country,date,confirmed,deaths,recovered FROM JHUDATA;")
+colnames(ECDC_dat) <- c("Countries","Reported","Cases","Deaths","Recovered")
+ECDC_dat$Reported <- as.Date(ECDC_dat$Reported)
+
+ECDC <- ECDC_dat %>% filter(Cases >0 )
+
+```
+
+## Data Source: John Hopkins Coronavirus Resource Center
+* URL: https://coronavirus.jhu.edu/map.html
+* GitHub: https://github.com/CSSEGISandData/COVID-19.git
+
+#### Plot Total Cases by Countries
+
+```{r,echo=FALSE}
+ECDC_Countries_reported <- ECDC %>% group_by(Countries,Reported) %>%                                 summarise(
+                       TotalCases = sum(Cases),
+                       TotalDeaths = sum(Deaths),
+                       PercentDeaths =     TotalDeaths/TotalCases,
+                                      Count = n()) %>% arrange(-TotalCases)
+                                     
+```
+```{r,echo=FALSE}
+ECDC_Countries <- ECDC %>% group_by(Countries) %>%                                 summarise(
+                       TotalCases = sum(Cases),
+                       TotalDeaths = sum(Deaths),
+                       PercentDeaths =     TotalDeaths/TotalCases,
+                                      Count = n()) %>% arrange(-TotalCases)
+                                     
+```
+
+
+
+
+
+
+
+```{r,echo=FALSE}   
+ECDC_Countries_LT50 <- ECDC_Countries %>% filter(TotalCases <= 49)
+ECDC_Countries_50 <- ECDC_Countries %>% filter(TotalCases >=50)
+ECDC_Countries_500 <- ECDC_Countries %>% filter(TotalCases >=500)
+ECDC_Countries_1000 <- ECDC_Countries %>% filter(TotalCases >=1000)
+ECDC_Countries_5000 <- ECDC_Countries %>% filter(TotalCases >=5000)
+ECDC_Countries_10000 <- ECDC_Countries %>% filter(TotalCases >=10000)
+```
+#### Total Confimed  Cases by Countries
+
+```{r,echo=FALSE}
+
+ ECDC_Countries_LT50  %>%
+  ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+        labs(title ="Countries with Confirmed Cases <= 50") +
+  coord_flip() + scale_y_continuous(labels = scales::comma) 
+```
+```{r,echo=FALSE}
+ ECDC_Countries_50  %>%
+  ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+        labs(title ="Countries with Confirmed Cases >= 50") +
+  coord_flip() + scale_y_continuous(labels = scales::comma) 
+```
+
+```{r,echo=FALSE}
+ ECDC_Countries_500  %>%
+  ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+        labs(title ="Countries with Confirmed Cases >= 500") +
+  coord_flip() + scale_y_continuous(labels = scales::comma) 
+```
+```{r, echo=FALSE}
+# 
+ECDC_Countries_1000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+        labs(title ="Countries with Confirmed Cases >=1000") +
+  coord_flip() + scale_y_continuous(labels = scales::comma) 
+```
+```{r,echo=FALSE}
+#
+ECDC_Countries_5000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+        labs(title ="Countries with Confirmed Cases >= 5000") +
+  coord_flip() + scale_y_continuous(labels = scales::comma) 
+  
+```
+```{r,echo=FALSE}
+#
+ECDC_Countries_10000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+        labs(title ="Countries with Confirmed Cases >= 10000") +
+  coord_flip() + scale_y_continuous(labels = scales::comma) 
+  
+```
+#### Death Rate Percentage by Countries 
+
+```{r, echo=FALSE}
+ ECDC_Countries_500 %>% ggplot() + geom_col(aes(x=reorder(Countries,PercentDeaths),y=PercentDeaths)) +
+        labs(title ="Death Rate Percentage: Countries with Confirmed Cases > 500",x="Percentage of Confirmed Case That End in Death") +
+        scale_y_continuous(labels=scales::percent) + coord_flip()
+```
+```{r}
+# 
+ECDC_Countries_1000 %>% ggplot() +  geom_col(aes(x=reorder(Countries,PercentDeaths),y=PercentDeaths)) +
+        labs(title ="Death Rate Percentage:Countries with Confirmed Cases > 1000", 
+        x="Percentage of Confirmed Case That End in Death") + 
+        scale_y_continuous(labels=scales::percent) + coord_flip()
+```
+```{r}
+#
+ECDC_Countries_5000 %>% ggplot() +geom_col(aes(x=reorder(Countries,PercentDeaths),y=PercentDeaths)) +
+        labs(title ="Death Rate Percentage: Countries with Confirmed Cases > 5000", x="Percentage of Confirmed Case That End in Death") +              scale_y_continuous(labels=scales::percent) + coord_flip()
+
+```
+
+#### US Vs World: Total Cases,Total Deaths, Death Rate
+
+```{r}
+ECDC_us <- ECDC %>% filter(Countries=="USA")
+ECDC_world <- ECDC %>% filter(Countries !="USA")
+#
+world_total_daily <- ECDC_world %>% group_by(Reported) %>% summarise(
+                                      TotalCases = sum(Cases),
+                                      TotalDeaths = sum(Deaths),
+                                      DeathRate = TotalDeaths/TotalCases,
+                                      Count = n())
+#
+US_total_daily <- ECDC_us %>% group_by(Reported) %>% summarise(
+                                      TotalCases = sum(Cases),
+                                      TotalDeaths = sum(Deaths),
+                                      DeathRate = TotalDeaths/TotalCases,Count = n())
+
+```
+
+```{r, echo=FALSE}
+ggplot() + geom_line(data=US_total_daily,aes(x=Reported,y=TotalCases,col="US")) +
+  geom_line(data=world_total_daily,aes(x=Reported,y=TotalCases,col="World")) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title="US vs World: Total Confirmed Cases By Date")
+```
+```{r}
+ggplot() + geom_line(data=US_total_daily,aes(x=Reported,y=TotalDeaths,col="US")) +
+  geom_line(data=world_total_daily,aes(x=Reported,y=TotalDeaths,col="World")) +
+  scale_y_continuous(labels = scales::comma) + 
+  labs(title="US vs World: Total Deaths By Date")
+```
+
+```{r}
+ggplot() + geom_line(data=US_total_daily,aes(x=Reported,y=DeathRate,col="US")) +
+  geom_line(data=world_total_daily,aes(x=Reported,y=DeathRate,col="World")) +
+  labs(title="US vs World: Death Rate as  Percentage By Date") +
+  scale_y_continuous(labels=scales::percent, limits = c(0.0,0.4))
+  
+```
+```{r}
+
+world_total_daily$E <- movavg(world_total_daily$TotalCases, 20,"e")
+world_total_daily %>% ggplot() +geom_line(aes(x=Reported,y=TotalCases,col="Cases")) +
+  geom_line(aes(x=Reported,y=E,col="Exponential")) + labs(title="Total Cases vs Moving Average",subtitle = "( 20 Day Exponential Moving Average)")
+```
+```{r}
+world_total_daily$E1 <- movavg(world_total_daily$TotalDeaths, 20,"e")
+world_total_daily %>% ggplot() +geom_line(aes(x=Reported,y=TotalDeaths,col="Total Deaths")) +
+  geom_line(aes(x=Reported,y=E1,col="Exponential")) + labs(title="Total Deaths vs Moving Average",subtitle ="( 20 Day Exponential Moving Average)" )
+```
+
+### European CDC: Just the Facts
+
+```{r}
+world_less_us <- ECDC%>% filter(Countries !="USA")
+sum(na.omit(world_less_us$Deaths))/sum(na.omit(world_less_us$Cases)) *100
+
+sum(na.omit(ECDC$Deaths))/sum(na.omit(ECDC$Cases)) *100
+
+US <-ECDC %>% filter(Countries=="USA")
+sum(na.omit(US$Deaths))/sum(na.omit(US$Cases)) * 100
+
+
+```
+    
+    
+ 
+
+                 
