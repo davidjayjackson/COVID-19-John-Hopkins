@@ -86,3 +86,7 @@ library(RSQLite)
 db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
 dta$date <- as.character(dta$date)
 dbWriteTable(db, "JHUDATA",dta ,overwrite=TRUE)
+##
+### Begin my stuff David Jackson
+
+  

@@ -20,13 +20,13 @@ library(forcats)
 ```
 ```{r,echo=FALSE}
 db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
-# ECDC_dat <- dbGetQuery(db, "SELECT # # Countries,CountryCode,Reported,Cases,Deaths,Population FROM ECDC;")
-#
+
 ECDC_dat <- dbGetQuery(db, "SELECT country,date,confirmed,deaths,recovered FROM JHUDATA;")
 colnames(ECDC_dat) <- c("Countries","Reported","Cases","Deaths","Recovered")
 ECDC_dat$Reported <- as.Date(ECDC_dat$Reported)
 
-ECDC <- ECDC_dat %>% filter(Cases >0 )
+ECDC <- ECDC_dat %>% group_by(Countries) %>% filter(Reported == max(Reported))
+
 
 ```
 
@@ -64,42 +64,40 @@ ECDC_Countries <- ECDC %>% group_by(Countries) %>%                              
 #### Total Confimed  Cases by Countries
 
 ```{r,echo=FALSE}
-ECDC_Countries %>% filter(TotalCases <= 49) %>%
+ECDC_Countries %>% filter(TotalCases >= 750) %>%
    ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
         labs(title ="Countries with Confirmed Cases <= 50") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
 ```
 ```{r,echo=FALSE}
-ECDC_Countries_50 <- ECDC_Countries %>% filter(TotalCases >=1000) %>%
+ECDC_Countries %>% filter(TotalCases >=1000) %>%
   ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
         labs(title ="Countries with Confirmed Cases >= 1000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
 ```
 
 ```{r,echo=FALSE}
-ECDC_Countries_500 <- ECDC_Countries %>% filter(TotalCases >=2000)
-
- ECDC_Countries_500  %>%
+ECDC_Countries %>% filter(TotalCases >=2000) %>%
   ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
         labs(title ="Countries with Confirmed Cases >= 2000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
 ```
 ```{r, echo=FALSE}
-ECDC_Countries_1000 <- ECDC_Countries %>% filter(TotalCases >=4000)
-ECDC_Countries_1000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+ECDC_Countries %>% filter(TotalCases >=4000) %>%
+ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
         labs(title ="Countries with Confirmed Cases >=4000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
 ```
 ```{r,echo=FALSE}
 ECDC_Countries_5000 <- ECDC_Countries %>% filter(TotalCases >=8000)
-ECDC_Countries_5000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+ ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
         labs(title ="Countries with Confirmed Cases >= 8000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
   
 ```
 ```{r,echo=FALSE}
-ECDC_Countries_10000 <- ECDC_Countries %>% filter(TotalCases >=16000)
-ECDC_Countries_10000 %>% ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
+ECDC_Countries %>% filter(TotalCases >=16000) %>%
+ggplot() + geom_col(aes(x=reorder(Countries,TotalCases),y=TotalCases)) +
         labs(title ="Countries with Confirmed Cases >= 16000") +
   coord_flip() + scale_y_continuous(labels = scales::comma) 
   

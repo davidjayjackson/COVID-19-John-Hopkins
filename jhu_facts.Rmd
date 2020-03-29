@@ -46,6 +46,7 @@ df.us <- data.frame("Reported"  = us_reported,
                   "Deaths" = us_deaths,
                  "Recovered" = us_recovered
                  )
+df.us$Reported <- as.Date(df.us$Reported)
 ```
 ```{r}
 df.world <- data.frame("Reported"  = world_reported,
@@ -54,14 +55,18 @@ df.world <- data.frame("Reported"  = world_reported,
                  "Deaths" =  world_deaths,
                   "Recovered" = world_recovered
                                  )
+df.world$Reported <- as.Date(df.world$Reported)
 ```
-
 ```{r}
-df.source <- rbind(df.us,df.world)
-df.source$Reported <- as.Date(df$Reported)
+df.source <- df.source$Reported <- as.Date(df$Reported)
+
 df.source$DeathRate <- df.source$Deaths/df.source$Cases * 100
 df.source$RecoveryRate <- df.source$Recovered/df.source$Cases *100
 
+```
+```{r}
+df.combined <- rbind(df.us,c(Reported,Source,Cases,Deaths,Recovered),
+                    df.world,c(Reported,Source,Cases,Deaths,Recovered))
 ```
 
 ## nCOVID-2019 Summary Report for Mar. 27,2020

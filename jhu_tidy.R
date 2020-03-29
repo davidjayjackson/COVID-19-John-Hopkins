@@ -35,7 +35,13 @@ recovered_raw <- read_csv("./DATA/time_series_covid19_recovered_global.csv")
 jh_covid19_data <- clean_jhd_to_long(confirmed_raw) %>%
   full_join(clean_jhd_to_long(deaths_raw)) %>%
   full_join(clean_jhd_to_long(recovered_raw))
-
+##
+### Added SQLite Code: David Jackson 2020-03-28library(RSQLite)
+##
+db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
+jh_covid19_data$date <- as.character(jh_covid19_data$date)
+dbWriteTable(db, "JHUDATA",jh_covid19_data ,overwrite=TRUE)
+## 
 
 # Next, I pull official country level indicators from the UN Statstics Division
 # to get country level identifiers.
@@ -116,7 +122,4 @@ jh_covid19_data <- jh_covid19_data %>% left_join(jhd_countries) %>%
 
 write_csv(jh_covid19_data, sprintf("jh_covid19_data_%s.csv", Sys.Date()))
 # The code essentially follows the following steps
-library(RSQLite)
-db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
-jh_covid19_data$date <- as.character(jh_covid19_data$date)
-dbWriteTable(db, "JHUDATA",jh_covid19_data ,overwrite=TRUE)
+
