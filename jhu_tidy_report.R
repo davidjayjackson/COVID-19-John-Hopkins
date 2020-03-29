@@ -80,3 +80,9 @@ ggplot(df %>% filter (edate_confirmed <= 30),
     title = "Focus on the first month: Confirmed Cases\n"
   ) +
   gg_my_blob
+
+##
+library(RSQLite)
+db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
+dta$date <- as.character(dta$date)
+dbWriteTable(db, "JHUDATA",dta ,overwrite=TRUE)
