@@ -123,3 +123,5 @@ jh_covid19_data <- jh_covid19_data %>% left_join(jhd_countries) %>%
 write_csv(jh_covid19_data, sprintf("jh_covid19_data_%s.csv", Sys.Date()))
 # The code essentially follows the following steps
 
+
+##
