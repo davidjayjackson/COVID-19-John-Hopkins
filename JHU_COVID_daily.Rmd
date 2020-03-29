@@ -21,7 +21,7 @@ library(forcats)
 ```{r,echo=FALSE}
 db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
 
-ECDC_dat <- dbGetQuery(db, "SELECT country,date,confirmed,deaths,recovered FROM JHUDATA;")
+ECDC_dat <- JHUDATA<- dbGetQuery(db, "SELECT countries,Reported,Cases,Deaths,Recovered FROM JHUDATA;")
 colnames(ECDC_dat) <- c("Countries","Reported","Cases","Deaths","Recovered")
 ECDC_dat$Reported <- as.Date(ECDC_dat$Reported)
 
