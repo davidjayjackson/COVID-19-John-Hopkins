@@ -27,7 +27,7 @@ db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
 JHUDATA<- dbGetQuery(db, "SELECT country,Date,confirmed,deaths,recovered FROM JHUDATA;")
 colnames(JHUDATA) <- c("Countries","Date","Cases","Deaths","Recovered")
 JHUDATA$Date <- as.Date(JHUDATA$Date)
-dbDisconnect(db)
+
 
 ```
 
@@ -89,7 +89,7 @@ us_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~death_rate) %>%
 ### The World(including US) COVID-19 Data by Cases, Deaths and Death Rate.
 
 ```{r}
-world_yearly <- JHU_US %>% group_by(Yearly =floor_date(Date,"year")) %>%                                             summarise(
+world_yearly <- JHUDATA %>% group_by(Yearly =floor_date(Date,"year")) %>%                                             summarise(
   
                                     tc = sum(Cases),
                                     td = sum(Deaths),
@@ -99,7 +99,7 @@ world_yearly <- JHU_US %>% group_by(Yearly =floor_date(Date,"year")) %>%        
                                     Count = n())
 
 # Summary by Month
-world_monthly <- JHU_US %>% group_by(Monthly =floor_date(Date,"month")) %>%                                            summarise(
+world_monthly <- JHUDATA %>% group_by(Monthly =floor_date(Date,"month")) %>%                                            summarise(
                                         tc = sum(Cases),
                                         td = sum(Deaths), 
                                         mean_cases = mean(Cases),
@@ -107,7 +107,7 @@ world_monthly <- JHU_US %>% group_by(Monthly =floor_date(Date,"month")) %>%     
                                         Count = n())
 
 ## Weekly Summary
-world_weekly <- JHU_US %>% group_by(Weekly =floor_date(Date,"week")) %>%                                             summarise(
+world_weekly <- JHUDATA %>% group_by(Weekly =floor_date(Date,"week")) %>%                                             summarise(
                                       tc = sum(Cases),
                                       td = sum(Deaths),
                                       mean_cases = mean(Cases),
@@ -116,7 +116,7 @@ world_weekly <- JHU_US %>% group_by(Weekly =floor_date(Date,"week")) %>%        
                                       Count = n())
 
 ## Daily Summary
-world_daily <- JHU_US %>% group_by(Daily =floor_date(Date,"day")) %>%                                              summarise(
+world_daily <- JHUDATA %>% group_by(Daily =floor_date(Date,"day")) %>%                                              summarise(
                                     tc = sum(Cases),
                                     td = sum(Deaths),  
                                     mean_cases = mean(Cases),
@@ -136,10 +136,11 @@ world_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~death_rate) %>%
         layout(title="World : Percent of Cases Ending in Death by Week") 
       
 ```
+
 ### The World (minus US) COVID-19 Data by Cases, Deaths and Death Rate.
 
 ```{r}
-less_US <- JHUDATA %>% filter(Countries == "US" )
+less_US <- JHUDATA %>% filter(Countries != "US" )
 world_yearly <- less_US %>% group_by(Yearly =floor_date(Date,"year")) %>%                                             summarise(
   
                                     tc = sum(Cases),
@@ -187,3 +188,41 @@ world_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~death_rate) %>%
         layout(title="World (less US): Percent of Cases Ending in Death by Week") 
       
 ```
+```{r}
+
+JHULATEST <-  JHUDATA %>% 
+  group_by(Date, Countries) %>%
+  summarise(
+    TotalCases = sum(Cases, na.rm=TRUE)
+  ) %>%
+  group_by(Countries) %>%
+  arrange(desc(Date)) %>%
+  mutate(
+    PreviousTotalCases = lead(TotalCases)
+  ) %>%
+  ungroup() %>%
+  na.omit()
+
+JHULATEST$Date <- as.character(JHULATEST$Date)
+dbWriteTable(db, "JHULATEST",JHULATEST ,overwrite=TRUE)
+dbListTables(db)
+
+
+```
+```{r}
+JHULATEST %>% ggplot() + geom_point(aes(x=Date,y=PreviousTotalCases))
+```
+```{r}
+df_us <- JHULATEST %>% filter(Countries=="US")
+ggplot(df_us) + geom_line(aes(x=Date,y=TotalCases,col="Total Cases")) + 
+  geom_line(aes(x=Date,y=PreviousTotalCases,col="Previous Total"))
+```
+```{r}
+plot_ly(df_us) %>% add_lines(x=~Date,y=~TotalCases,name="TotalCases") %>%
+            add_lines(x=~Date,y=~PreviousTotalCases,name="PreviousTotalCases")
+
+```
+```{r}
+dbDisconnect(db)
+```
+
