@@ -1,14 +1,13 @@
 ---
 title: 'US vs World: China/Hunan Virus 2019'
 author: "David J Jackson"
-date: "3/23/2020"
+Date: "3/23/2020"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-library(DT)
 library(pracma)
 library(plotly)
 library(scales)
@@ -22,74 +21,113 @@ library(RSQLite)
 ```{r, echo=FALSE}
 rm(list=ls())
 #these libraries are necessary
-#create the URL where the dataset is stored with automatic updates every day
+#create the URL where the dataset is stored with automatic upDates every day
 db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
 
-JHUDATA<- dbGetQuery(db, "SELECT countries,Reported,Cases,Deaths,Recovered FROM JHUDATA;")
-# colnames(JHUDATA) <- c("Countries","Reported","Cases","Deaths","Recovered")
-JHUDATA$Reported <- as.Date(JHUDATA$Reported)
+JHUDATA<- dbGetQuery(db, "SELECT country,Date,confirmed,deaths,recovered FROM JHUDATA;")
+colnames(JHUDATA) <- c("Countries","Date","Cases","Deaths","Recovered")
+JHUDATA$Date <- as.Date(JHUDATA$Date)
 dbDisconnect(db)
 
 ```
 
 #### Data Date Range
 ```{r,echo=FALSE}
-min(JHUDATA$Reported)
-max(JHUDATA$Reported)
+min(JHUDATA$Date)
+max(JHUDATA$Date)
 ```
+
+### The World: Summary by Day for Cases,Deaths, and Percent of Deaths
 
 ```{r,echo=FALSE}
 # Calculate Summary Cases and Deaths(World)
 # World
 # JHUDATA Summary by Year
-JHUDATA_Year <- JHUDATA %>% group_by(Yearly =floor_date( Reported,"year")) %>% summarise(
-                                                        tc = sum(Cases),
-                                                        td = sum(Deaths),                                                                                                  perdeaths = td/tc,
-                                                        Count = n())
+JHUDATA_Year <- JHUDATA %>% group_by(Yearly =floor_date(Date,"year")) %>%                                             summarise(
+  
+                                    tc = sum(Cases),
+                                    td = sum(Deaths),
+                                    mean_cases = mean(Cases),
+                                    mean_deaths = mean(Deaths),
+                                    death_rate = td/tc,
+                                    Count = n())
 
 # Summary by Month
-JHUDATA_monthly <- JHUDATA %>% group_by(Monthly =floor_date( Reported,"month")) %>%                                                              summarise(
-                                                        tc = sum(Cases),
-                                                        td = sum(Deaths),                                                                perdeaths = td/tc,
-                                                        Count = n())
+JHUDATA_monthly <- JHUDATA %>% group_by(Monthly =floor_date(Date,"month")) %>%                                            summarise(
+                                        tc = sum(Cases),
+                                        td = sum(Deaths), 
+                                        mean_cases = mean(Cases),
+                                        mean_deaths = mean(Deaths),                                                        death_rate = td/tc,
+                                        Count = n())
 
 ## Weekly Summary
-JHUDATA_weekly <- JHUDATA %>% group_by(Weekly =floor_date( Reported,"week")) %>% summarise(
-                                                        tc = sum(Cases),
-                                                        td = sum(Deaths),                                                                 perdeaths = td/tc,
-                                                        Count = n())
+JHUDATA_weekly <- JHUDATA %>% group_by(Weekly =floor_date(Date,"week")) %>%                                             summarise(
+                                      tc = sum(Cases),
+                                      td = sum(Deaths),
+                                      mean_cases = mean(Cases),
+                                      mean_deaths = mean(Deaths),
+                                      death_rate = td/tc,
+                                      Count = n())
 
 ## Daily Summary
-JHUDATA_daily <- JHUDATA %>% group_by(Daily =floor_date( Reported,"day")) %>% summarise(
-                                                        tc = sum(Cases),
-                                                        td = sum(Deaths),                                                                 perdeaths = td/tc,
-                                                        Count = n())
+JHUDATA_daily <- JHUDATA %>% group_by(Daily =floor_date(Date,"day")) %>%                                              summarise(
+                                    tc = sum(Cases),
+                                    td = sum(Deaths),  
+                                    mean_cases = mean(Cases),
+                                    mean_deaths = mean(Deaths),
+                                    death_rate = td/tc,
+                                    Count = n())
 ```
+```{r, echo=FALSE}
+JHUDATA_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~tc) %>% 
+        layout(title="The World: Total Cases By Day")
+
+
+JHUDATA_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~td) %>% 
+        layout(title="The World: Total Deaths By Day")
+
+JHUDATA_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~death_rate) %>% 
+        layout(title="The World: Percent of Cases Ending in Death by Week") 
+      
+```
+
 
 ```{r, echo=FALSE}
 # By Country
 # Weekly
-Countries_yearly <- JHUDATA %>% group_by(Countries,Yearly =floor_date( Reported,"year")) %>% summarise(
+Countries_yearly <- JHUDATA %>% group_by(Countries,Yearly =floor_date( Date,"year")) %>% summarise(
                                                         tc = sum(Cases),
-                                                        td = sum(Deaths),                                                                 perdeaths = td/tc,
+                                                        td = sum(Deaths),                                                                 death_rate = td/tc,
                                                               Count = n())
 
 # Monthly
 # Monthly
-Countries_monthly <- JHUDATA %>% group_by(Countries,Monthly =floor_date( Reported,"month")) %>% summarise(
+Countries_monthly <- JHUDATA %>% group_by(Countries,Monthly =floor_date( Date,"month")) %>% summarise(
                                                         tc = sum(Cases),
-                                                        td = sum(Deaths),                                                                 perdeaths = td/tc,
+                                                        td = sum(Deaths),                                                                 death_rate = td/tc,
                                                               Count = n())
 
 # Weekly
-Countries_weekly <- JHUDATA %>% group_by(Countries,Weekly =floor_date( Reported,"week")) %>% summarise(
+Countries_weekly <- JHUDATA %>% group_by(Countries,Weekly =floor_date( Date,"week")) %>% summarise(
                                                         tc = sum(Cases),
-                                                        td = sum(Deaths),                                                                 perdeaths = td/tc,
+                                                        td = sum(Deaths),                                                                 death_rate = td/tc,
                                                               Count = n())
-# World minus US
+## Daily
+Countries_daily <- JHUDATA %>% group_by(Date) %>% summarise(
+                                                        tc = sum(Cases),
+                                                        td = sum(Deaths),                                                                 death_rate = td/tc,
+                                                              Count = n())
+```
+
+
+#### World minus US
+
+```{r}
 JHUDATA_minus_us <- Countries_weekly %>% filter(Countries != "US" )
+```
 
 # USA Only
+```{r}
 US_yearly <- Countries_yearly %>% filter(Countries == "US" )
 US_monthly <- Countries_monthly %>% filter(Countries == "US" )
 US_weekly <- Countries_weekly %>% filter(Countries == "US" )
@@ -105,7 +143,7 @@ JHUDATA_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~tc) %>%
 JHUDATA_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~td) %>% 
         layout(title="The World: Total Deaths By Day")
 
-JHUDATA_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~perdeaths) %>% 
+JHUDATA_daily %>% plot_ly() %>% add_lines(x=~Daily,y=~death_rate) %>% 
         layout(title="The World: Percent of Cases Ending in Death by Week") 
       
 ```
@@ -118,15 +156,15 @@ US_weekly %>% plot_ly() %>% add_lines(x=~Weekly,y=~tc) %>%
         layout(title="USA: Total Cases By Week")
 US_weekly %>% plot_ly() %>% add_lines(x=~Weekly,y=~td) %>% 
         layout(title="USA: Total Deaths By Week")
-US_weekly %>% plot_ly() %>% add_lines(x=~Weekly,y=~perdeaths) %>% 
+US_weekly %>% plot_ly() %>% add_lines(x=~Weekly,y=~death_rate) %>% 
         layout(title="USA Percent of Cases Ending in Death by Week")
 ```
 
 ## US vs World: Percent of Death by Week
 
 ```{r,echo=FALSE}
-plot_ly() %>% add_lines(data=US_weekly,x=~Weekly,y=~perdeaths,name="USA") %>% 
-        add_lines(data=JHUDATA_weekly,x=~Weekly,y=~perdeaths,name="World") %>%
+plot_ly() %>% add_lines(data=US_weekly,x=~Weekly,y=~death_rate,name="USA") %>% 
+        add_lines(data=JHUDATA_weekly,x=~Weekly,y=~death_rate,name="World") %>%
         layout(title="USA/World Percent of Cases Ending in Death by Week")
 ```
 
@@ -134,47 +172,34 @@ plot_ly() %>% add_lines(data=US_weekly,x=~Weekly,y=~perdeaths,name="USA") %>%
 
 ```{r, echo=FALSE}
 
-JHUDATA$Reported <- as.character(JHUDATA$Reported)
-db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
-dbListTables(db)
-```
-```{r,echo=FALSE}
-dbWriteTable(db, "JHUDATA", JHUDATA,overwrite=TRUE)
-```
-```{r, echo=FALSE}
-# Countries <- JHUDATA %>% group_by(Countries,Population) %>% 
-#         summarise(Count=n())
-# dbWriteTable(db, "Countries", Countries,overwrite=TRUE)
-# dbListTables(db)
-# dbDisconnect(db)
 ```
 
 ### Daly Totals form Cases,Deaths and Death Rate
 
 ```{r, echo=FALSE}
-df <-JHUDATA %>% group_by(Reported) %>% summarise(
+df <-JHUDATA %>% group_by(Date) %>% summarise(
                                           TotalCases=sum(Cases),
                                          TotalDeaths = sum(Deaths),
                                          DeathRate = TotalDeaths/TotalCases)
-df %>% plot_ly() %>% add_bars(x=~Reported,y=~TotalCases) %>% layout(title="Total Confrimed Cases by Day")
+df %>% plot_ly() %>% add_bars(x=~Date,y=~TotalCases) %>% layout(title="Total Confrimed Cases by Day")
 
-df %>% plot_ly() %>% add_bars(x=~Reported,y=~TotalDeaths) %>% layout(title="Total Confrimed Deaths by Day")
+df %>% plot_ly() %>% add_bars(x=~Date,y=~TotalDeaths) %>% layout(title="Total Confrimed Deaths by Day")
 
-df %>% plot_ly() %>% add_bars(x=~Reported,y=~DeathRate) %>% layout(title="Total Confrimed Deaths by Day")
+df %>% plot_ly() %>% add_bars(x=~Date,y=~DeathRate) %>% layout(title="Total Confrimed Deaths by Day")
 ```
 
 ### US Daily Reports for Cases,Deaths and Death Rate
 
 ```{r,echo=FALSE}
 
-df.us <-JHUDATA %>% filter(Countries =="US") %>% group_by(Reported) %>% summarise(
+df.us <-JHUDATA %>% filter(Countries =="US") %>% group_by(Date) %>% summarise(
                                           TotalCases=sum(Cases),
                                          TotalDeaths = sum(Deaths),
                                          DeathRate = TotalDeaths/TotalCases)
 
-df.us %>% plot_ly() %>% add_bars(x=~Reported,y=~TotalCases) %>% layout(title="US Total Confrimed Cases by Day")
+df.us %>% plot_ly() %>% add_bars(x=~Date,y=~TotalCases) %>% layout(title="US Total Confrimed Cases by Day")
 
-df.us %>% plot_ly() %>% add_bars(x=~Reported,y=~TotalDeaths) %>% layout(title="US Total Confrimed Deaths by Day")
+df.us %>% plot_ly() %>% add_bars(x=~Date,y=~TotalDeaths) %>% layout(title="US Total Confrimed Deaths by Day")
 
-df.us %>% plot_ly() %>% add_bars(x=~Reported,y=~DeathRate) %>% layout(title="US Death Rate (as Percentage) by Day")
+df.us %>% plot_ly() %>% add_bars(x=~Date,y=~DeathRate) %>% layout(title="US Death Rate (as Percentage) by Day")
 ```
