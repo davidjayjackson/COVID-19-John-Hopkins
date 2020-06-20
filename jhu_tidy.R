@@ -2,6 +2,7 @@ library(tidyverse)
 library(lubridate)
 library(rvest)
 library(stringdist)
+library(RSQLite)
 rm(list=ls())
 ## Source: https://www.r-bloggers.com/tidying-the-john-hopkins-covid-19-data/
 ## Author:  An Accounting and Data Science Nerd's Corner
@@ -38,7 +39,7 @@ jh_covid19_data <- clean_jhd_to_long(confirmed_raw) %>%
 ##
 ### Added SQLite Code: David Jackson 2020-03-28library(RSQLite)
 ##
-db <- dbConnect(SQLite(), dbname="../db/CORVID.sqlite3")
+db <- dbConnect(SQLite(), dbname="../COVIDDB//CORVID.sqlite3")
 jh_covid19_data$date <- as.character(jh_covid19_data$date)
 dbWriteTable(db, "JHUDATA",jh_covid19_data ,overwrite=TRUE)
 ## 
