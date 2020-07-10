@@ -83,7 +83,7 @@ ggplot(df %>% filter (edate_confirmed <= 90),
 
 ##
 # library(RSQLite)
-# db <- dbConnect(SQLite(), dbname="../COVIDDB//CORVID.sqlite3")
+# db <- dbConnect(SQLite(), dbname="../COVIDDB//COVID.sqlite3")
 # dta$date <- as.character(dta$date)
 # dbWriteTable(db, "JHUDATA",dta ,overwrite=TRUE)
 ##
