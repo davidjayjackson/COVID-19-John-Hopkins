@@ -29,9 +29,9 @@ clean_jhd_to_long <- function(df) {
     select(country, date, !! sym(var_str)) 
 }
 
-confirmed_raw <- read_csv("./DATA/time_series_covid19_confirmed_global.csv")
-deaths_raw <- read_csv("./DATA/time_series_covid19_deaths_global.csv")
-recovered_raw <- read_csv("./DATA/time_series_covid19_recovered_global.csv")
+confirmed_raw <- read_csv("../DATA/time_series_covid19_confirmed_global.csv")
+deaths_raw <- read_csv("../DATA/time_series_covid19_deaths_global.csv")
+recovered_raw <- read_csv("../DATA/time_series_covid19_recovered_global.csv")
 
 jh_covid19_data <- clean_jhd_to_long(confirmed_raw) %>%
   full_join(clean_jhd_to_long(deaths_raw)) %>%
